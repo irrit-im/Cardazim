@@ -29,6 +29,7 @@ class Connection:
         self.connection.sendall(packed_data)
 
     def receive_message(self) -> str:
+        assert isinstance(self.connection, socket.socket)
         data_len = int.from_bytes(self.connection.recv(HEADER_SIZE), "little")
         raw_data = b""
         while data_len > 0:
