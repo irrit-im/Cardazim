@@ -34,8 +34,11 @@ def main():
     Implementation of CLI and sending data to server.
     """
     args = get_args()
-    send_data(args.server_ip, args.server_port, args.data)
-    print("Done.")
+    try:
+        send_data(args.server_ip, args.server_port, args.data)
+        print("Done.")
+    except ConnectionRefusedError:
+        print("Connection refused by target machine. Make sure the server is running.")
 
 
 if __name__ == "__main__":
