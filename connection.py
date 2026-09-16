@@ -1,5 +1,6 @@
 import socket
 import struct
+from typing import Self
 
 
 class Connection:
@@ -9,8 +10,8 @@ class Connection:
     @classmethod
     def connect(cls, host, port) -> "Connection":
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        connection = sock.connect((host, port))
-        return cls(connection=connection)
+        sock.connect((host, port))
+        return cls(connection=sock)
 
     def __repr__(self) -> str:
         source_ip, source_port = self.connection.getsockname()
@@ -29,18 +30,19 @@ class Connection:
         data_len = int.from_bytes(self.connection.recv(4), "little")
         raw_data = self.connection.recv(data_len)
         data = raw_data.decode("utf-8")
-        print(f"Received: {data}")
+        return data
 
     def close(self) -> None:
         self.connection.close()
 
-    def __enter__(self, host, port) -> None:
-        self.connect(host, port)
+    def __enter__(self, *args, **kwargs) -> Self:
+        return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         self.close()
 
 
 if __name__ == "__main__":
-    with Connection.connect("127.0.0.1", 5000) as c:
-        c.send_message("fdshjhgjkdfhdhfhgh")
+    with Connection.connect("127.0.0.1", 5006) as c:
+        c.send_message("gffj")
+        c.send_message("fojghkfjfk")
