@@ -19,13 +19,21 @@ def get_message(connection: Connection) -> str:
 def run_server(ip, port) -> None:
     with Listener(ip, port) as listener:
         print(listener)
-        # with listener.accept() as connection:
-        #     print(connection.receive_message())
-        for _ in range(MAX_CONNECTIONS):
-            with listener.accept() as connection:
+        connections = []
+        threads = []
+        try:
+            for _ in range(MAX_CONNECTIONS):
+                connection = listener.accept()
+                connections.append(connection)
                 assert isinstance(connection, Connection)
                 t = threading.Thread(target=get_message, args=(connection,))
                 t.start()
+                threads.append(t)
+        finally:
+            for thread in threads:
+                thread.join()
+            for connection in connections:
+                connection.close()
 
 
 def get_args():
