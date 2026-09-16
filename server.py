@@ -10,9 +10,14 @@ HEADER_SIZE = 4
 def recieve_data(socket: socket.socket) -> None:
     connection, _addr = socket.accept()
     data_len = int.from_bytes(connection.recv(HEADER_SIZE), "little")
-    raw_data = connection.recv(data_len)
+    raw_data = b""
+    while data_len > 0:
+        new_data = connection.recv(data_len)
+        raw_data += new_data
+        data_len -= len(new_data)
+
     data = raw_data.decode()
-    print(f"connected. recieved: {data}")
+    print(f"connected. received: {data}")
 
 
 def run_server(ip, port) -> None:
