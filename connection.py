@@ -2,6 +2,8 @@ import socket
 import struct
 from typing import Self
 
+HEADER_SIZE = 4
+
 
 class Connection:
     def __init__(self, connection: socket.socket) -> "Connection":
@@ -27,9 +29,15 @@ class Connection:
         self.connection.sendall(packed_data)
 
     def receive_message(self) -> str:
-        data_len = int.from_bytes(self.connection.recv(4), "little")
-        raw_data = self.connection.recv(data_len)
-        data = raw_data.decode("utf-8")
+        data_len = int.from_bytes(self.connection.recv(HEADER_SIZE), "little")
+        raw_data = b""
+        while data_len > 0:
+            new_data = self.connection.recv(data_len)
+            raw_data += new_data
+            data_len -= len(new_data)
+
+        data = raw_data.decode()
+
         return data
 
     def close(self) -> None:
