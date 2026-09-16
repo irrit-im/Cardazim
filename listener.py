@@ -1,7 +1,7 @@
 import socket
+from typing import Self
 
 from connection import Connection
-from typing import Self
 
 
 class Listener:
