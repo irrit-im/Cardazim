@@ -1,27 +1,16 @@
 import argparse
 import sys
-import socket
-import struct
-import threading
+
+from listener import Listener
 
 HEADERSIZE = 4
 
 
-def recieve_data(connection) -> None:
-    raw_data = connection.recv(4096)
-    data = raw_data[4:].decode("utf-8")
-    print(f"connected. recieved: {data}")
-    connection.close()
-
-
 def run_server(ip, port) -> None:
-    serversocket = socket.socket()
-    serversocket.bind((ip, port))
-    serversocket.listen(5)
-    while True:
-        connection, addr = serversocket.accept()
-        t = threading.Thread(target=recieve_data, args=(connection,))
-        t.start()
+    with Listener(ip, port) as listener:
+        print(listener)
+        with listener.accept() as connection:
+            print(connection.receive_message())
 
 
 def get_args():
@@ -36,12 +25,9 @@ def main():
     Implementation of CLI and sending data to server.
     """
     args = get_args()
-    try:
-        run_server(args.server_ip, args.server_port)
-        print("Done.")
-    except Exception as error:
-        print(f"ERROR: {error}")
-        return 1
+
+    run_server(args.server_ip, args.server_port)
+    print("Done.")
 
 
 if __name__ == "__main__":
