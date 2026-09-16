@@ -4,24 +4,25 @@ import socket
 import struct
 import threading
 
-HEADERSIZE = 4
+HEADER_SIZE = 4
 
 
-def recieve_data(connection) -> None:
-    raw_data = connection.recv(4096)
-    data = raw_data[4:].decode("utf-8")
+def recieve_data(socket: socket.socket) -> None:
+    connection, _addr = socket.accept()
+    data_len = int.from_bytes(connection.recv(HEADER_SIZE), "little")
+    raw_data = connection.recv(data_len)
+    data = raw_data.decode()
     print(f"connected. recieved: {data}")
-    connection.close()
 
 
 def run_server(ip, port) -> None:
-    serversocket = socket.socket()
-    serversocket.bind((ip, port))
-    serversocket.listen(5)
-    while True:
-        connection, addr = serversocket.accept()
-        t = threading.Thread(target=recieve_data, args=(connection,))
-        t.start()
+    with socket.socket() as serversocket:
+        serversocket.bind((ip, port))
+        serversocket.listen(5)
+        while True:
+
+            t = threading.Thread(target=recieve_data, args=(serversocket,))
+            t.start()
 
 
 def get_args():
