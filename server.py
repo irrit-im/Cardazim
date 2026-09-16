@@ -1,16 +1,31 @@
 import argparse
 import sys
+import threading
 
+from connection import Connection
 from listener import Listener
 
-HEADERSIZE = 4
+HEADER_SIZE = 4
+MAX_CONNECTIONS = 2
+
+
+def get_message(connection: Connection) -> str:
+    assert isinstance(connection, Connection)
+    message = connection.receive_message()
+    print(f"Rceived: {message}")
+    return message
 
 
 def run_server(ip, port) -> None:
     with Listener(ip, port) as listener:
         print(listener)
-        with listener.accept() as connection:
-            print(connection.receive_message())
+        # with listener.accept() as connection:
+        #     print(connection.receive_message())
+        for _ in range(MAX_CONNECTIONS):
+            with listener.accept() as connection:
+                assert isinstance(connection, Connection)
+                t = threading.Thread(target=get_message, args=(connection,))
+                t.start()
 
 
 def get_args():
